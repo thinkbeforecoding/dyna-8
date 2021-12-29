@@ -10,15 +10,19 @@ function _init()
 end
 
 function init()
- sp1 = {x=0,y=0,s=0}
- sp2 = {x=120,y=120,s=0}
- sprites={sp1,sp2}
- p1={x=0,y=0,s=sp1,spri=0,sp0=2,id=0,nt=1,r=2,alive=true,b={}}
- p2={x=120,y=120,s=sp2,spri=0,sp0=6,id=1,nt=1,r=2,alive=true,b={}}
+ sprites={}
+ p1= newp(0,120,120,2)
+ p2= newp(1,0,0,6)
  tnts={}
  anim={}
  clearwalls()
  fillwalls()
+end
+
+function newp(id,x,y,sp0)
+ local sp = {x=x,y=y,s=0}
+ add(sprites,sp)
+ return {x=x,y=y,vx=0,vy=0,s=sp,spri=0,sp0=sp0,id=id,nt=1,r=2,alive=true,b={}}
 end
 
 function _update()
@@ -113,12 +117,30 @@ function move(p)
   vy*=0.707
  end
  
- tdest(p,vx,vy) 
+ if p.b.name=="nostop" then
+  if vx==0 and vy==0 then
+   vx=p.vx
+   vy=p.vy
+  end
+ 	if vx!=0 then
+ 	 vx= 2*sgn(vx)
+ 	end
+ 	if vy!=0 then
+ 	 vy= 2*sgn(vy)
+ 	end
+ end
+ 
+ local v = tdest(p,vx,vy) 
+ p.x += v.x
+ p.y += v.y
  tbonus(p)
  
+ p.vx = v.x
+ p.vy = v.y
  p.s.x = p.x
  p.s.y = p.y
  p.s.s = p.sp0 + p.spri
+ 
 end
 
 function swap(p,s1,s2)
@@ -299,7 +321,7 @@ bonus={
  "invisible",
  "inverse",
  "fast",
--- "nostop",
+ "nostop",
  "slow",
 -- "inertia",
 -- "wind",
@@ -409,7 +431,7 @@ end
 
 function expwall(bx,by)
  wait(10)
- if true or rnd(4)<1 then
+ if rnd(4)<1 then
   local r= rnd(7)
   if r<2 then
    mset(bx,by,17)
@@ -593,9 +615,7 @@ function tdest(p,vx,vy)
   end
  end
  
- p.x=dx
- p.y=dy
-
+ return {x=dx-p.x,y=dy-p.y}
 end
 
 
